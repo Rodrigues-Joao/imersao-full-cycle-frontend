@@ -1,4 +1,3 @@
-import { error } from "console";
 import type { Config } from "tailwindcss";
 
 export default {
@@ -10,14 +9,14 @@ export default {
   theme: {
     extend: {
       colors: {
-        default: '#242526',
-        main: '#ffcd00',
-        error: '#F35759',
-        success: '#366912'
+        default: "#242526",
+        main: "#ffcd00",
+        error: "#f35759",
+        success: "#366912",
       },
       textColor: {
-        contrast: '#FFF',
-        primary: '#242526'
+        primary: "#242526",
+        contrast: "#ffffff"
       }
     },
   },
