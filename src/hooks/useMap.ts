@@ -4,7 +4,7 @@ import { Map } from "../utils/map";
 import { getCurrentPosition } from "@/utils/geolocation";
 
 
-export function useMap( containerRef: React.RefObject<HTMLDivElement> )
+export function useMap( containerRef: React.RefObject<HTMLDivElement | null> )
 {
     const [map, setMap] = useState<Map>();
 

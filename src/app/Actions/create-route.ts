@@ -1,5 +1,7 @@
 'use server'
 
+import { revalidateTag } from "next/cache"
+
 export async function createRouteAction( state: { error?: string, success?: boolean } | null, formData: FormData )
 {
     const { sourceId, destinationId } = Object.fromEntries( formData )
@@ -15,6 +17,7 @@ export async function createRouteAction( state: { error?: string, success?: bool
         headers: {
             "Content-Type": "application/json"
         },
+
         body: JSON.stringify( {
             name: `${ startAddress } - ${ endAddress }`,
             sourceId,
@@ -24,5 +27,6 @@ export async function createRouteAction( state: { error?: string, success?: bool
     } )
     if ( !response.ok )
         return { error: 'Failed to create new route' }
+    revalidateTag( "routes" )
     return { success: true }
 }
