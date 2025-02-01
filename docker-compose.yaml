@@ -1,4 +1,7 @@
 name: imersao-full-cycle
+include:
+  - ../../backend/nestjs-api/docker-compose.yaml
+
 services:
   next_js:
     build: .
