@@ -13,7 +13,7 @@ export function NewRouteForm( props: PropsWithChildren )
                 <div className='p-4 border rounded text-contrast bg-error' >{state.error}</div>
             )}
             {state?.success && (
-                <div className='p-4 border rounded text-contrast bg-success' >{state.success}</div>
+                <div className='p-4 border rounded text-contrast bg-success' >Rota criada com sucesso!</div>
             )}
             {props.children}</form>
     )

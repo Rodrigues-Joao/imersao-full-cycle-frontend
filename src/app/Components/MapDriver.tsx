@@ -5,20 +5,13 @@ import { useMap } from "../../hooks/useMap";
 import { socket } from "@/utils/socket-io";
 
 export type MapDriverProps = {
-    routeId?: string,
-    startLocation: {
-        lat: number;
-        lng: number;
-    } | null,
-    endLocation?: {
-        lat: number;
-        lng: number;
-    } | null
+    routeIdElement?: string,
+
 }
 
 export function MapDriver( props: MapDriverProps )
 {
-    const { routeId, startLocation, endLocation } = props
+    const { routeIdElement } = props
     const mapContainerRef = useRef<HTMLDivElement>( null );
     const map = useMap( mapContainerRef );
 
@@ -28,50 +21,57 @@ export function MapDriver( props: MapDriverProps )
         // {
         //     return;
         // }
-        if ( !map || !routeId || !startLocation || !endLocation )
+        if ( !map || !routeIdElement )
         {
             return;
         }
+        console.log( "MapDriver" )
 
-        // const selectElement = document.querySelector(
-        //     `#${ routeIdElementId }`
-        // )!;
-
-        socket.offAny();
+        const selectElement = document.querySelector(
+            `#${ routeIdElement }`
+        )!;
         socket.connect();
-        //     selectElement.addEventListener( "change", handler );
-        socket.on( 'connect', () =>
+        const handler = async ( event: any ) =>
         {
-            console.log( "connected " )
-            socket.emit( `client:new-points`, { routeId } )
-        } )
-        socket.on(
-            `server:new-points/${ routeId }:list`, ( data: { routeId: string, lat: number, lng: number } ) =>
-        {
-            console.log( data )
-            if ( !map.hasRoute( data.routeId ) )
+            const routeId = event.target!.value
+            socket.offAny();
+
+
+            console.log( `handler routeId = ${ routeId }` )
+            socket.on(
+                `server:new-points/${ routeId }:list`, async ( data: { routeId: string, lat: number, lng: number } ) =>
             {
-                map.addRouteWithIcons( {
-                    routeId: data.routeId,
-                    startMarkerOptions: {
-                        position: startLocation
-                    },
-                    endMarkerOptions: {
-                        position: endLocation
-                    },
-                    carMarkerOptions: {
-                        position: startLocation
-                    },
-                } );
-            }
-            map.moveCar( data.routeId, { lat: data.lat, lng: data.lng } )
-        } )
+                console.log( data )
+
+                if ( !map.hasRoute( data.routeId ) )
+                {
+                    const response = await fetch(
+                        `${ process.env.NEXT_PUBLIC_NEXT_API_URL }/routes/${ data.routeId }`
+                    );
+                    const route = await response.json();
+                    map.addRouteWithIcons( {
+                        routeId: data.routeId,
+                        startMarkerOptions: {
+                            position: route.directions.routes[0].legs[0].start_location,
+                        },
+                        endMarkerOptions: {
+                            position: route.directions.routes[0].legs[0].end_location,
+                        },
+                        carMarkerOptions: {
+                            position: route.directions.routes[0].legs[0].start_location,
+                        },
+                    } );
+                }
+                map.moveCar( data.routeId, { lat: data.lat, lng: data.lng } );
+            } )
+        }
+        selectElement.addEventListener( "change", handler );
         return () =>
         {
-            //   selectElement.removeEventListener( "change", handler );
-            // socket.disconnect();
+            selectElement.removeEventListener( "change", handler );
+            socket.disconnect();
         };
-    }, [map, startLocation, endLocation, routeId] );
+    }, [map, routeIdElement] );
 
     return <div className="w-2/3 h-full" ref={mapContainerRef} />;
 }
